@@ -269,24 +269,24 @@ func (tx *Tx) nonPhysicalRollback() {
 	tx.close()
 }
 
-func log(msg string) {
+func tempLog(msg string) {
 	fmt.Printf("%s: %s\n", time.Now().Format(time.RFC3339), msg)
 }
 
 // rollback needs to reload the free pages from disk in case some system error happens like fsync error.
 func (tx *Tx) rollback() {
-	log("BOLT: CALLING HARD ROLLBACK")
-	defer log("BOLT: FINISHED HARD ROLLBACK")
+	tempLog("BOLT: CALLING HARD ROLLBACK")
+	defer tempLog("BOLT: FINISHED HARD ROLLBACK")
 	if tx.db == nil {
 		return
 	}
 	if tx.writable {
-        log("BOLT: ROLLBACK in WRITABLE TX")
+        tempLog("BOLT: ROLLBACK in WRITABLE TX")
 		tx.db.freelist.rollback(tx.meta.txid)
 		if !tx.db.hasSyncedFreelist() {
 			// Reconstruct free page list by scanning the DB to get the whole free page list.
 			// Note: scaning the whole db is heavy if your db size is large in NoSyncFreeList mode.
-			log("BOLT: DOING NO SYNC RELOAD")
+			tempLog("BOLT: DOING NO SYNC RELOAD")
 			tx.db.freelist.noSyncReload(tx.db.freepages())
 		} else {
 			// Read free page list from freelist page.
